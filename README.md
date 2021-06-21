@@ -1,8 +1,6 @@
-## Welcome to GitHub Pages
+## Welcome to stats workshop 2021!
+Every summer, the [Osborne-Nishimura lab](https://onishlab.colostate.edu/) does a summer workshop series, and it has grown every year! This summer we're focusing on different topics related to regression, linear or otherwise.
 
-You can use the [editor on GitHub](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
 ### Markdown
 
