@@ -7,6 +7,10 @@ This repository will provide the resources, code and presentation material neces
 
 ### Ben Prytherch - issues in regression modeling
 
+Blurb. 
+
+[Files](benprytherch)
+
 ### David King
 
 ### Jess Hill
