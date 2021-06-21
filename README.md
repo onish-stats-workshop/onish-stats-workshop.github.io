@@ -9,7 +9,7 @@ This repository will provide the resources, code and presentation material neces
 
 Blurb. 
 
-[Files](benprytherch)
+[Files](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/benprytherch)
 
 ### David King
 
