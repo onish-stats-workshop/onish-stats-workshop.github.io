@@ -13,7 +13,22 @@ Blurb.
 
 ### David King
 
+Blurb. 
+
+[Files](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/benprytherch)
+
+
 ### Jess Hill
 
+Blurb. 
+
+[Files](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/benprytherch)
+
+
 ### The beta regression guy
+
+Blurb. 
+
+[Files](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/benprytherch)
+
 
