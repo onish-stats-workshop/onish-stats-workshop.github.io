@@ -19,6 +19,7 @@ In the past, we have had people find a tutorial of some kind and present it to t
 * [Choosing the type of regression](https://statisticsbyjim.com/regression/choosing-regression-analysis/) Kudos if you can find biological examples for these different types! Hinit: try the resources below.
 * Is ANOVA the same as Regression?
 * Beta Regression, Logistic Regression deep dive?
+* Others
 
 
 ### Resources
