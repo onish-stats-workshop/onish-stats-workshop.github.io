@@ -19,8 +19,7 @@ In the past, we have had people find a tutorial of some kind and present it to t
 * [Choosing the type of regression](https://statisticsbyjim.com/regression/choosing-regression-analysis/) Kudos if you can find biological examples for these different types! Hinit: try the resources below.
 * Is ANOVA the same as Regression?
 * Beta Regression, Logistic Regression deep dive?
-* Others
-
+* Others?
 
 ### Resources
 
@@ -28,30 +27,10 @@ In the past, we have had people find a tutorial of some kind and present it to t
 
 ## Topics/Speakers so far
 
-### Ben Prytherch - issues in regression modeling
+### Ben Prytherch - To include or not include variables
 
-Blurb. 
-
-[Files](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/benprytherch)
-
-### David King
-
-Blurb. 
-
-[Files](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/benprytherch)
+Ben will demonstrate, by simulation, the consequences of controlling for different experimental variables in an experimental model of bacterial colonization in the *C. elegans* intestine.
 
 
-### Jess Hill
-
-Blurb. 
-
-[Files](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/benprytherch)
-
-
-### The beta regression guy
-
-Blurb. 
-
-[Files](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/benprytherch)
 
 
