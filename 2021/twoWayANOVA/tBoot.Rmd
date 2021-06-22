@@ -1,0 +1,53 @@
+---
+title: "Bootstrap_t"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r tBoot}
+# https://en.wikipedia.org/wiki/Bootstrapping_(statistics)#Bootstrap_hypothesis_testing
+tStat = function(x,y) {
+  (mean(x)-mean(y)) / sqrt( var(x)/length(x) + var(y)/length(y)  )
+}
+
+tBoot = function(x,y, B=1000) {
+  n = length(x)
+  m = length(y)
+  xmean = mean(x)
+  ymean = mean(y)
+  t = tStat(x,y)
+  
+  zmean = mean(c(x,y))
+  xprime = x - xmean + zmean
+  yprime = y - ymean + zmean
+  
+  dist = replicate(B,
+                    {
+                      x_star = sample(xprime, length(xprime), replace=T)
+                      y_star = sample(yprime, length(yprime), replace=T)
+                      return(tStat(x_star,y_star))
+                    })
+  return(list(t=t,dist=dist,p.greater=sum(dist >= t)/B))
+}
+
+tBootStat=tBoot(rnorm(15,1),rnorm(15,0))
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
