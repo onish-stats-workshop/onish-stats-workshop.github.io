@@ -16,7 +16,11 @@ In the past, we have had people find a tutorial of some kind and present it to t
 
 ### Suggested Topics / Tutorials
 * [Basics and Assumptions](https://www.hackerearth.com/practice/machine-learning/machine-learning-algorithms/beginners-guide-regression-analysis-plot-interpretations/tutorial/) A very important review and walk-through of what linear regression is, and how to check the assumptions on your data.
-* [Choosing the type of regression](https://statisticsbyjim.com/regression/choosing-regression-analysis/) Kudos if you can find biological examples for these different types!
+* [Choosing the type of regression](https://statisticsbyjim.com/regression/choosing-regression-analysis/) Kudos if you can find biological examples for these different types! Hinit: try the resources below.
+
+### Resources
+
+[Modern Statistics for Modern Biology)(https://www.huber.embl.de/msmb/)
 
 ## Topics/Speakers so far
 
