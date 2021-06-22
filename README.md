@@ -23,7 +23,7 @@ In the past, we have had people find a tutorial of some kind and present it to t
 
 ### Resources
 
-[Modern Statistics for Modern Biology)(https://www.huber.embl.de/msmb/)
+[Modern Statistics for Modern Biology](https://www.huber.embl.de/msmb/)
 
 ## Topics/Speakers so far
 
