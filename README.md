@@ -12,7 +12,7 @@ Enterprising folks are encouraged to build their presentation into an RMarkdown 
 
 ### What to do
 
-In the past, we have had people find a tutorial of some kind and present it to the workshop. Extra kudos if you can add your own data to it to test it out!
+In the past, we have had people find a tutorial of some kind and present it to the workshop. Extra kudos if you can add your own data to it to test it out! Email me at David.King@colostate.edu if you are interested in presenting.
 
 ### Suggested Topics / Tutorials
 * [Basics and Assumptions](https://www.hackerearth.com/practice/machine-learning/machine-learning-algorithms/beginners-guide-regression-analysis-plot-interpretations/tutorial/) A very important review and walk-through of what linear regression is, and how to check the assumptions on your data.
