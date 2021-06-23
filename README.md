@@ -26,9 +26,9 @@ In the past, we have had people find a tutorial of some kind and present it to t
 
 [Modern Statistics for Modern Biology](https://www.huber.embl.de/msmb/)
 
-* Past speakers
-** [2020](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/2020)
-** [2019](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/2019)
+### Past speakers
+* [2020](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/2020)
+* [2019](https://github.com/onish-stats-workshop/onish-stats-workshop.github.io/tree/main/2019)
 
 
 ## Topics/Speakers so far
