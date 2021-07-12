@@ -1,0 +1,213 @@
+---
+title: "Linear Regression Stats Workshop 2021"
+author: "David C. King"
+date: "7/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(broom)
+```
+
+# Linear Regression
+Association between two measurements.
+As scientists, we often try to decipher the relationship between phenomena. Is thing 1 *associated with* thing 2? Or ultimately, does thing 1 *influence* thing 2? does thing 1 *cause* thing 2.
+
+
+```{r cor}
+# Fisher's Iris data
+cor(iris$Petal.Length,iris$Petal.Width)
+
+# Correlation is high, but there is more than one group.
+# Fisher was trying to build a classifier
+with(iris, plot(Petal.Length, Petal.Width, col=Species))
+levels(iris$Species)
+iris.mod = lm(Petal.Width ~ Petal.Length, data=iris)
+abline(iris.mod)
+
+summary(iris.mod)
+```
+The slope on the line is `0.415755`, fit by least squares. The p-values test whether the estimated parameters are different than zero. Adjusted R-Squared is **(very!)** high: `0.9266`. *(Adjusted R-Squared <= Multiple R-Squared, and penalizes for number of predictors; see https://en.wikipedia.org/wiki/Coefficient_of_determination#Adjusted_R2)*
+
+The last line shows the F-statistic/ANOVA. You can perform that test directly on the model via `anova(iris.mod)`.
+
+# The mechanics of linear regression.
+
+```{r }
+
+# equation for a line is: y = mx + b
+m = .5 # choose a slope
+b = 3
+# plot points on a line
+N = 20 # number of points
+x = 1:N
+y = m * x + b
+plot(x, y)
+
+# linear regression equation is: y = B0 + B1x + e
+# the values of y deviate from the line by the error term e
+set.seed(0)
+y = b + m * x + rnorm(N) # the error is normally distributed
+plot(x, y, xlim=c(0, max(x)), ylim=c(0, max(y)))
+abline(h=0)
+abline(v=0)
+model = lm(y ~ x)
+abline(model)
+summary(model)
+
+```
+
+```{r residuals}
+# residuals are the distances between each point and the line
+plot(x, y, xlim=c(0, max(x)), ylim=c(min(0,y), max(y)))
+abline(h=0)
+abline(v=0)
+model = lm(y ~ x)
+abline(model)
+segments(x, y, x, predict(model), col="red")
+
+# amplify error around the line
+set.seed(0)
+y = b + m * x + rnorm(N, 0, 2)
+plot(x, y, xlim=c(0, max(x)), ylim=c(min(0,y), max(y)))
+abline(h=0)
+abline(v=0)
+model = lm(y ~ x)
+abline(model)
+segments(x, y, x, predict(model), col="red")
+
+```
+
+``` {r regression-diagnostics}
+mod.diag = augment(model) # augment is from package broom
+head(mod.diag)
+cooksd = mod.diag$.cooksd # Cook's distance is a measure of an individual point's "leverage": the difference in the model when the point is removed.
+
+
+
+# replot with outliers marked
+plot(x, y, xlim=c(0, max(x)), ylim=c(min(0,y), max(y)), )
+abline(h=0)
+abline(v=0)
+abline(model)
+segments(x, y, x, predict(model), col="red")
+
+
+
+```
+
+Let's add an outlier.
+```{r add-outliers}
+
+# add 1.5,12
+x2 = c(x, 1.5)
+y2 = c(y, 12)
+model2 = lm(y2 ~ x2)
+mod.diag = augment(model2) # augment is from package broom
+cooksd = mod.diag$.cooksd
+sum(cooksd > 4/N) 
+
+plot(x2, y2, 
+     xlim=c(0, max(x2)), 
+     ylim=c(min(0,y2), max(y2)),
+     pch=ifelse(cooksd > 4/N, 4,1), # give an 'X' for the outliers
+     main="Outlier added (x)",
+     sub="dashed: model w/o outlier"
+     ) 
+
+abline(h=0)
+abline(v=0)
+abline(model, lty=2)
+abline(model2)
+segments(x2, y2, x2, predict(model2), col="red")
+
+ 
+## add another
+x3 = c(x2, 20.5)
+y3 = c(y2, 0)
+model3 = lm(y3 ~ x3)
+mod.diag = augment(model3) # augment is from package broom
+cooksd = mod.diag$.cooksd
+sum(cooksd > 4/N)  
+cooksd[cooksd > 4/N]
+# we see that this new outlier pulls the slope drastically downward
+plot(x3, y3,
+     xlim=c(0, max(x3)), 
+     ylim=c(min(0,y3), max(y3)),
+     pch=ifelse(cooksd > 4/N, 4,1),
+     main="Second outlier added",  # give an 'X' for the outliers
+     sub="dashed: model w/o outliers")
+abline(h=0)
+abline(v=0)
+abline(model, lty=2)
+abline(model3)
+segments(x3, y3, x3, predict(model3), col="red")
+
+
+```
+
+## When the outlier drives the entire association
+
+```{r outlier-ruiner}
+set.seed(0)
+# a random cloud centered at 10,5
+x4 = rnorm(N, 10) 
+y4 = rnorm(N, 5)
+x4 = c(x4, 20)
+y4 = c(y4, 0)
+model4 = lm(y4 ~ x4)
+mod.diag = augment(model4)
+cooksd = mod.diag$.cooksd
+sum(cooksd > 4/N)  
+cooksd[cooksd > 4/N]
+summary(model4)
+
+plot(x4,y4,
+     pch=ifelse(cooksd > 4/N, 4,1),
+     main="Random cloud with outlier added",  # give an 'X' for the outliers
+     sub="dashed: model w/o outliers")
+     
+abline(model4)
+
+# "censor" the outliers
+df = data.frame(x=x4,y=y4)
+model4.censored = lm(y ~ x, data=df[cooksd < 4/N,])
+abline(model4.censored, lty=2)
+```
+
+```{r are-they-outliers}
+
+# add more
+x5 = c(x4, 18.5)
+y5 = c(y4, 0.8)
+x5 = c(x5, 19.5)
+y5 = c(y5, 2)
+model5 = lm(y5 ~ x5)
+
+
+mod.diag = augment(model5)
+cooksd = mod.diag$.cooksd
+sum(cooksd > 4/N)  
+cooksd[cooksd > 4/N]
+summary(model5)
+
+plot(x5,y5,
+     pch=ifelse(cooksd > 4/N, 4,1),
+     main="Outliers close together",  # give an 'X' for the outliers
+     sub="dashed: model w/o outliers")
+abline(model5)
+
+df = data.frame(x=x5,y=y5)
+model5.censored = lm(y ~ x, data=df[cooksd < 4/N,])
+
+abline(model5.censored, lty=2)
+
+summary(model4.censored)
+summary(model5.censored)
+```
+
+
+```{r }
+```
