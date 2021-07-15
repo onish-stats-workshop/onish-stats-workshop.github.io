@@ -56,9 +56,19 @@ summary(iris.mod)
 
 The last line shows the F-statistic/ANOVA. You can perform that test directly on the model via `anova(iris.mod)`, or `aov(iris.mod)` for a slightly different interface.
 
-* The relationship may not necessarly be interesting to the Fisher and Anderson's original goals, but...
+* The relationship may not necessarily be interesting to the Fisher and Anderson's original goals, but...
 * is this a good dataset for linear regression?
-* Does the fit accurately describe the relationship betwee the variables, given the separation in groups?
+* Does the fit accurately describe the relationship between the variables, given the separation in groups?
+
+Keep these questions in mind.
+
+Build up linear regression:
+* from a straight line
+* adding noise
+* adding outliers
+* adding groups
+
+How does linear regression perform on these types of data, and what do we do when we encounter it?
 
 Let's reverse engineer the process of regression a little, and then start shaking it up.
 
@@ -215,6 +225,9 @@ df = data.frame(x=x4,y=y4)
 model4.censored = lm(y ~ x, data=df[cooksd < 4/N,])
 abline(model4.censored, lty=2) # dashed line: model with outliers removed.
 ```
+
+IF your data has outliers, run the regression without them and see if the association still exists, or changes.
+
 
 ## Are they outliers if they lie together?
 
