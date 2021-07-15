@@ -56,8 +56,9 @@ summary(iris.mod)
 
 The last line shows the F-statistic/ANOVA. You can perform that test directly on the model via `anova(iris.mod)`, or `aov(iris.mod)` for a slightly different interface.
 
-* The relationship may not necessarly be interesting to the Fisher and Anderson's original goals, but is the regression applied correctly?
-* Does the fit slope and intercept, and the R-squared accurately describe the relationship, given the separation in groups?
+* The relationship may not necessarly be interesting to the Fisher and Anderson's original goals, but...
+* is this a good dataset for linear regression?
+* Does the fit accurately describe the relationship betwee the variables, given the separation in groups?
 
 Let's reverse engineer the process of regression a little, and then start shaking it up.
 
@@ -375,19 +376,15 @@ The intrinsic clustering did a good job of separating the groups.
 
 The outcome is: cluster 1 has a slope of `r simp.histone$Allbeta[1]`, not as sharp as the original `r simp.histone$groupbeta`, whereas the second cluster is much flatter `r simp.histone$Allbeta[2]`. 
 
-Indeed, the correlation coefficients show that the separation of the groups caused the high correlation.
+The correlation coefficients show that the separation of the groups caused the high correlation.
 
-```{r r-data-jess}
-
-data = data.frame(Sample=1:50,
-                  gene_exp = c( rnorm(25, 47.5), # treated with RNAi
-                                rnorm(25, 50)), # RNAi-negative control
-                  RNAi =    c( rep(1,25), # RNAi treated are first 25
-                               rep(0,25)),
-                  Drug =    rep(c(0,1),25) # drug treatment is not associated with a drop in expression
-                  )
-data
-
-boxplot(gene_exp ~ Drug, data = data)
+```{r routines in Simpsons}
+coef(simp.histone)
+summary(simp.histone)
+cluster(simp.histone)
+plot(simp.histone)
 ```
+It's not the full-fledged paradox because the signs aren't reversed, but the groups in the data have different associations,or some have an association where others don't.
+
+
 
