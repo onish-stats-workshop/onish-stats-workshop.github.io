@@ -1,12 +1,12 @@
 ---
 title: "Linear Regression Stats Workshop 2021"
 author: "David C. King"
-date: "7/11/2021"
+date: "7/15/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(broom)
 ```
@@ -15,27 +15,57 @@ library(broom)
 Association between two measurements.
 As scientists, we often try to decipher the relationship between phenomena. Is thing 1 *associated with* thing 2? Or ultimately, does thing 1 *influence* thing 2? does thing 1 *cause* thing 2.
 
+## Iris Dataset
+Anderson: catalog natural variation in Iris species. 
+
+Fisher: figure out how to classify species by different relationships.
+
+![By Frank Mayfield - originally posted to Flickr as Iris virginica shrevei BLUE FLAG, CC BY-SA 2.0, https://commons.wikimedia.org/w/index.php?curid=9805580](species_of_iris_s_ve_vi.png)
+
+Setosa attribution: CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=170298
 
 ```{r cor}
 # Fisher's Iris data
+head(iris)
 cor(iris$Petal.Length,iris$Petal.Width)
 
 # Correlation is high, but there is more than one group.
 # Fisher was trying to build a classifier
-with(iris, plot(Petal.Length, Petal.Width, col=Species))
+#with(iris, plot(Petal.Length, Petal.Width, col=Species, main="iris dataset"))
+gp = ggplot(iris, 
+           aes(Petal.Length, Petal.Width, col=Species)) + 
+  geom_point() + 
+  ggtitle("iris dataset") 
+
+print(gp) # plots the previous commands
+
 levels(iris$Species)
 iris.mod = lm(Petal.Width ~ Petal.Length, data=iris)
-abline(iris.mod)
+
+# add the regression line to the plot
+gp + geom_abline(intercept = iris.mod$coefficients['(Intercept)'], 
+                 slope = iris.mod$coefficients['Petal.Length'])
+
 
 summary(iris.mod)
 ```
-The slope on the line is `0.415755`, fit by least squares. The p-values test whether the estimated parameters are different than zero. Adjusted R-Squared is **(very!)** high: `0.9266`. *(Adjusted R-Squared <= Multiple R-Squared, and penalizes for number of predictors; see https://en.wikipedia.org/wiki/Coefficient_of_determination#Adjusted_R2)*
+* The slope on the line is `0.415755`, fit by least squares.
+* The p-values test whether the estimated parameters are different than zero. 
+* Adjusted R-Squared is **(very!)** high: `0.9266`. 
+* Adjusted R-Squared penalizes for number of predictors; see https://en.wikipedia.org/wiki/Coefficient_of_determination#Adjusted_R2)
 
-The last line shows the F-statistic/ANOVA. You can perform that test directly on the model via `anova(iris.mod)`.
+The last line shows the F-statistic/ANOVA. You can perform that test directly on the model via `anova(iris.mod)`, or `aov(iris.mod)` for a slightly different interface.
 
-# The mechanics of linear regression.
+* The relationship may not necessarly be interesting to the Fisher and Anderson's original goals, but is the regression applied correctly?
+* Does the fit slope and intercept, and the R-squared accurately describe the relationship, given the separation in groups?
 
-```{r }
+Let's reverse engineer the process of regression a little, and then start shaking it up.
+
+# The mechanics of linear regression
+
+We'll start by plotting points on a perfect line, then add variation to those points.
+
+```{r perfect line}
 
 # equation for a line is: y = mx + b
 m = .5 # choose a slope
@@ -44,120 +74,128 @@ b = 3
 N = 20 # number of points
 x = 1:N
 y = m * x + b
-plot(x, y)
+plot(x, y, main="Points along a line")
 
+
+# The fit returns the parameters m and b
+perfect = lm(y ~ x)
+perfect
+
+# summary(perfect)
+# In summary.lm(perfect) : essentially perfect fit: summary may be unreliable
+```
+
+```{r perfect fit}
+# add the fit line to the plot
+plot(x, y, main="Perfect Line with fit")
+abline(perfect) # "perfect" is the variable returned by "lm(y ~ x)"
+```
+
+```{r fit a line to variation}
 # linear regression equation is: y = B0 + B1x + e
 # the values of y deviate from the line by the error term e
-set.seed(0)
-y = b + m * x + rnorm(N) # the error is normally distributed
-plot(x, y, xlim=c(0, max(x)), ylim=c(0, max(y)))
-abline(h=0)
-abline(v=0)
+
+set.seed(0) # try a different number for different randoms
+y = b + m * x + rnorm(N, mean=0, sd=1) # the error is normally distributed, mean = 0, standard deviation = 1
+plot(x, y, 
+     xlim=c(0, max(x)), 
+     ylim=c(0, max(y)),
+     pch=20,
+     main="Plot with normally distributed error added")
+abline(h=0) # horizontal axis
+abline(v=0) # vertical axis
 model = lm(y ~ x)
-abline(model)
+abline(model) # add the fitted line to the plot
+segments(x, y, x, predict(model), col="red") # add residuals to plot
+
+# Plot: A line with (more) variation
+set.seed(0)
+y = b + m * x + rnorm(N, mean=0, sd=3) # notice the increase in standard deviation
+plot(x, y, 
+     xlim=c(0, max(x)), 
+     ylim=c(min(0,y), max(y)),
+     pch=20,
+     main="straight line, more error")
+# axes
+abline(h=0) # horiz
+abline(v=0) # vert
+# fit the line
+model.wider = lm(y ~ x)
+abline(model.wider)
+segments(x, y, x, predict(model.wider), col="red")
+
 summary(model)
-
+summary(model.wider)
 ```
 
-```{r residuals}
-# residuals are the distances between each point and the line
-plot(x, y, xlim=c(0, max(x)), ylim=c(min(0,y), max(y)))
-abline(h=0)
-abline(v=0)
-model = lm(y ~ x)
-abline(model)
-segments(x, y, x, predict(model), col="red")
-
-# amplify error around the line
-set.seed(0)
-y = b + m * x + rnorm(N, 0, 2)
-plot(x, y, xlim=c(0, max(x)), ylim=c(min(0,y), max(y)))
-abline(h=0)
-abline(v=0)
-model = lm(y ~ x)
-abline(model)
-segments(x, y, x, predict(model), col="red")
-
-```
-
-``` {r regression-diagnostics}
-mod.diag = augment(model) # augment is from package broom
-head(mod.diag)
-cooksd = mod.diag$.cooksd # Cook's distance is a measure of an individual point's "leverage": the difference in the model when the point is removed.
-
-
-
-# replot with outliers marked
-plot(x, y, xlim=c(0, max(x)), ylim=c(min(0,y), max(y)), )
-abline(h=0)
-abline(v=0)
-abline(model)
-segments(x, y, x, predict(model), col="red")
-
-
-
-```
+# How do outliers affect the fit?
 
 Let's add an outlier.
 ```{r add-outliers}
+### Use a tighter spread.
+set.seed(0)
+y = b + m * x + rnorm(N, mean=0, sd=2)
 
-# add 1.5,12
+### model2: x2, y2. Add a single outlier.
 x2 = c(x, 1.5)
 y2 = c(y, 12)
 model2 = lm(y2 ~ x2)
-mod.diag = augment(model2) # augment is from package broom
+mod.diag = augment(model2) # 'augment' is from package 'broom'- it calculates diagnostics
+head(mod.diag)
 cooksd = mod.diag$.cooksd
-sum(cooksd > 4/N) 
+sum(cooksd > 4/N) # this counts the number satisfying "cookds > 4/N"
 
+# Plot: We see the outlier in the upper left shift the line slightly.
 plot(x2, y2, 
      xlim=c(0, max(x2)), 
      ylim=c(min(0,y2), max(y2)),
-     pch=ifelse(cooksd > 4/N, 4,1), # give an 'X' for the outliers
+     pch=ifelse(cooksd > 4/N, 4,20), # 'X' for the outliers (pch=4), pch=1 otherwise
      main="Outlier added (x)",
      sub="dashed: model w/o outlier"
      ) 
 
-abline(h=0)
-abline(v=0)
+abline(h=0); abline(v=0)
 abline(model, lty=2)
 abline(model2)
 segments(x2, y2, x2, predict(model2), col="red")
 
- 
-## add another
+### model3: x3,y3. Add another outlier on the lower right
 x3 = c(x2, 20.5)
 y3 = c(y2, 0)
 model3 = lm(y3 ~ x3)
-mod.diag = augment(model3) # augment is from package broom
+mod.diag = augment(model3) # 'augment' is from package 'broom'
 cooksd = mod.diag$.cooksd
 sum(cooksd > 4/N)  
 cooksd[cooksd > 4/N]
-# we see that this new outlier pulls the slope drastically downward
+
+# Plot: We see that this new outlier pulls the slope drastically downward.
 plot(x3, y3,
      xlim=c(0, max(x3)), 
      ylim=c(min(0,y3), max(y3)),
-     pch=ifelse(cooksd > 4/N, 4,1),
-     main="Second outlier added",  # give an 'X' for the outliers
+     pch=ifelse(cooksd > 4/N, 4,20), # 'X' for the outliers (pch=4), pch=20 otherwise
+     main="Second outlier added", 
      sub="dashed: model w/o outliers")
-abline(h=0)
-abline(v=0)
-abline(model, lty=2)
-abline(model3)
-segments(x3, y3, x3, predict(model3), col="red")
-
-
+abline(h=0) # x-axis
+abline(v=0) # y-axis
+abline(model, lty=2) # original fitted line (dashed, lty=2), before outliers
+abline(model3) # line with outliers added, (solid)
+segments(x3, y3, x3, predict(model3), col="red") # residuals
 ```
 
 ## When the outlier drives the entire association
 
 ```{r outlier-ruiner}
 set.seed(0)
+# model4: x4, y4. Random cloud + extreme outlier.
 # a random cloud centered at 10,5
 x4 = rnorm(N, 10) 
 y4 = rnorm(N, 5)
+# single outlier in lower right
 x4 = c(x4, 20)
 y4 = c(y4, 0)
 model4 = lm(y4 ~ x4)
+
+# regression diagnostics
 mod.diag = augment(model4)
 cooksd = mod.diag$.cooksd
 sum(cooksd > 4/N)  
@@ -165,20 +203,22 @@ cooksd[cooksd > 4/N]
 summary(model4)
 
 plot(x4,y4,
-     pch=ifelse(cooksd > 4/N, 4,1),
+     pch=ifelse(cooksd > 4/N, 4,1), # 'X' for the outliers (pch=4), pch=1 otherwise
      main="Random cloud with outlier added",  # give an 'X' for the outliers
      sub="dashed: model w/o outliers")
      
 abline(model4)
 
-# "censor" the outliers
+# model4.censored: a new model ignoring the outliers (via Cook's d)
 df = data.frame(x=x4,y=y4)
 model4.censored = lm(y ~ x, data=df[cooksd < 4/N,])
-abline(model4.censored, lty=2)
+abline(model4.censored, lty=2) # dashed line: model with outliers removed.
 ```
 
-```{r are-they-outliers}
+## Are they outliers if they lie together?
 
+```{r are-they-outliers}
+# model5: x5,y5. More outliers in the lower right.
 # add more
 x5 = c(x4, 18.5)
 y5 = c(y4, 0.8)
@@ -194,8 +234,8 @@ cooksd[cooksd > 4/N]
 summary(model5)
 
 plot(x5,y5,
-     pch=ifelse(cooksd > 4/N, 4,1),
-     main="Outliers close together",  # give an 'X' for the outliers
+     pch=ifelse(cooksd > 4/N, 4,1),  # 'X' for the outliers (pch=4), pch=1 otherwise
+     main="Outliers close together", 
      sub="dashed: model w/o outliers")
 abline(model5)
 
@@ -207,7 +247,147 @@ abline(model5.censored, lty=2)
 summary(model4.censored)
 summary(model5.censored)
 ```
+# Motivating example
+ChIP-seq for chromatin marks. Value is relative signal in a mutant background versus wild type, log scale.
+
+## Biological Question: Does a certain gene affect activating/repressing chromatin states?
+
+#### Experimental Approach- mutate that gene, measure the two different chromating states (via histone marks) in mutant and wildtype worms.
+The measurement is done genome wide by an experiment called ChIP-seq, which used antibodies specific histone mark to capture the DNA that presents that mark, and sequences the capture regions. Those regions are then identified by their sequence using next-generation sequencing, and the intensity is related to the amount the histones are modified and how often the region is captured in the population of isolated sample.
+
+#### What type of genes are targetted for the histone modifications facilitated by the gene of interest?
+
+#### Statistical approach: Is there a negative correlation between the histone mark intensities in certain types of genes, versus others.
+
+![Original data](different_correlations.png)
 
 
-```{r }
+```{r motivating-example}
+# ChIP-seq for chromatin marks. Value is relative signal in a mutant background versus wildtype, log scale.
+
+# intensity of repressive mark for a set of genes (each value = gene)
+h3k9me2 = c(-2.25, -1.75, -1.83, -1.17, 0.04, -1.37, -0.97, -2.06, -0.39, -0.40, -1.34, -1.36, -1.32, -1.42, -0.98, -1.12, -1.06, -1.32, -1.32, -0.06, -0.17, -0.03, -0.22, -0.03, -0.15, -0.05, -0.23, 0.06, -0.12, -0.05, 0.20, 0.10, -0.27, -0.39, -0.33, -0.39, -0.46, -0.55, -0.53, 0.26, 0.35, 0.20, 0.11, 0.06, 0.05, -0.32, -0.30, -0.62)
+
+# intensity of activating mark for a set of genes (each value = gene)
+h3k4me3 = c(2.25, 1.97, 0.95, 0.52, -0.07, 0.56, 0.76, 1.31, 0.52, 0.87, 0.44, 0.89, 0.96, 0.20, 0.10, -0.08, 1.81, 1.55, 1.50, -0.08, -0.06, -0.08, -0.11, -0.01, -0.09, -0.07, -0.07, -0.07, -0.02, 0.06, -0.10, -0.13, -0.14, -0.15, -0.04, 0.01, 0.06, 0.01, -0.09, -0.25, -0.25, 0.02, 0.07, 0.22, 0.17, 0.12, 0.27, 0.20)
+
+plot(h3k9me2, 
+     h3k4me3, 
+     xlim=c(-3,3), 
+     ylim=c(-3,3),
+     xlab="Repressing Signal: (H3K9me2) mutant / WT)",
+     ylab="Activating Signal (H3K4me3) mutant / WT)",
+     pty='s',
+     main="HTA-germline genes")
+abline(h=0)
+abline(v=0)
+text(2, -2, sprintf("r = %.3f", cor(h3k9me2,h3k4me3)))
+
+
+df = data.frame(h3k9me2, h3k4me3)
+lm.1 = lm(h3k4me3 ~ h3k9me2, data=df)
+lm.1.diag = augment(lm.1)
+cooksd = lm.1.diag$.cooksd
+
+plot(h3k9me2, 
+     h3k4me3, 
+     xlim=c(-3,3), 
+     ylim=c(-3,3),
+     xlab="Repressing Signal: (H3K9me2) mutant / WT)",
+     ylab="Activating Signal (H3K4me3) mutant / WT)",
+     pch=ifelse(cooksd > 4/N, 4,1),
+     pty='s',
+     main="HTA-germline genes (original model plus outliers removed)",
+     sub="dashed: outliers removed")
+abline(h=0)
+abline(v=0)
+
+# original 
+abline(lm.1)
+
+
+# with outliers removed
+lm.1.censored = lm(h3k4me3 ~ h3k9me2, data=df[cooksd < 4/N,])
+abline(lm.1.censored, lty=2)
+
 ```
+
+Question: Is there a better way to distinguish the correlation between histone marks for genes affected by the mutant?
+
+# Regression on mixed populations
+
+Searching around for regression diagnostics, trying to describe the problem in google, I eventually turn up Simpson's paradox.
+
+Simpson's paradox (Yule-Simpson effect): A trend within groups deviates, or even contradicts, a trend seen when the groups are aggregated.
+
+[Can be resolved when confounding variables and causal relations are appropriately addressed in the statistical modeling (wikipedia)](https://en.wikipedia.org/wiki/Simpson%27s_paradox)
+
+##Illustration
+
+![By Pace~svwiki - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=62007681](Simpsons_paradox_-_animation.gif)
+
+## Simpsons package in R
+
+Clusters may be provided, or calculated using mixture modeling. 
+It then runs a type of modeling called beta regression on the different clusters and compares to the overall model.
+
+### 'permutationtest'. 
+1. A regression is considered significantly different from the group if the difference in beta estimate exceeds the lower or upper 2.5 percent of the permuted null distribution. If this is the case, a warning is issued as follows: **"Warning: Beta regression estimate in cluster X is significantly different compared to the group!"**. 
+2. If the sign of the regression within a cluster is different (positive or negative) than the sign for the group and the beta estimate deviates significantly, a warning states **"Sign reversal: Simpson's Paradox! Cluster X is significantly different and in the opposite direction compared to the group!"**
+
+```{r Simpsons package, include=FALSE}
+# use include=FALSE above when knitting, or you get each step of the progress bar on its own line in the knitted document
+
+library(Simpsons)
+set.seed(0)
+Simpsons(h3k9me2, h3k4me3, data=df) -> simp.histone
+
+# Let's see how it does in the `iris` dataset.
+set.seed(0)
+Simpsons(Petal.Length, Petal.Width, data=iris) ->simp.iris
+```
+
+
+```{r value-of-the-output }
+
+ggplot(simp.histone$alldata, aes(X,Y,color=factor(clusterid))) + 
+  geom_point() + 
+  geom_abline(
+    slope=simp.histone$Allbeta[1], 
+    intercept = simp.histone$Allint[1], 
+    color="#F8766D") + 
+  geom_abline(
+    slope=simp.histone$groupbeta, 
+    intercept = simp.histone$groupint, 
+    color="grey", size = 2, alpha = .5) +
+  geom_abline(
+    slope=simp.histone$Allbeta[2], 
+    intercept = simp.histone$Allint[2], 
+    color="#00BFC4")  # you can find the 1st 2 ggplot colors with hue_pal()(2)
+
+correlation_by_group = simp.histone$alldata %>% 
+  group_by(clusterid) %>% 
+  summarize(cor(X,Y))
+
+print(correlation_by_group)
+```
+The intrinsic clustering did a good job of separating the groups.
+
+The outcome is: cluster 1 has a slope of `r simp.histone$Allbeta[1]`, not as sharp as the original `r simp.histone$groupbeta`, whereas the second cluster is much flatter `r simp.histone$Allbeta[2]`. 
+
+Indeed, the correlation coefficients show that the separation of the groups caused the high correlation.
+
+```{r r-data-jess}
+
+data = data.frame(Sample=1:50,
+                  gene_exp = c( rnorm(25, 47.5), # treated with RNAi
+                                rnorm(25, 50)), # RNAi-negative control
+                  RNAi =    c( rep(1,25), # RNAi treated are first 25
+                               rep(0,25)),
+                  Drug =    rep(c(0,1),25) # drug treatment is not associated with a drop in expression
+                  )
+data
+
+boxplot(gene_exp ~ Drug, data = data)
+```
+
