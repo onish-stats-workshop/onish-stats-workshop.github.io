@@ -63,6 +63,7 @@ The last line shows the F-statistic/ANOVA. You can perform that test directly on
 Keep these questions in mind.
 
 Build up linear regression:
+
 * from a straight line
 * adding noise
 * adding outliers

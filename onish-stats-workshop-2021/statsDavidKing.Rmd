@@ -9,11 +9,15 @@ output: html_document
 #knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(broom)
+library(Simpsons)
+library(ggplot2)
 ```
 
 # Linear Regression
 Association between two measurements.
-As scientists, we often try to decipher the relationship between phenomena. Is thing 1 *associated with* thing 2? Or ultimately, does thing 1 *influence* thing 2? does thing 1 *cause* thing 2.
+As scientists, we often try to decipher the relationship between phenomena. 
+
+Is thing 1 *associated with* thing 2? Or ultimately, does thing 1 *influence* thing 2? does thing 1 *cause* thing 2.
 
 ## Iris Dataset
 Anderson: catalog natural variation in Iris species. 
